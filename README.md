@@ -245,3 +245,40 @@ Search all events with the order increment id starting with `CK` and status succ
 
 To turn off asynchronous event indexing visit Admin > Stores > Settings > Configuration > Advanced > System >
 Async Events and disable `Enable Asynchronous Events Indexing`.
+
+## Related Modules
+
+### Common Events
+
+[Mage-OS Common Asynchronous Events](https://github.com/mage-os/mageos-common-async-events) includes several
+default events for this module:
+
+| Event identifier         | Description                                    |
+|--------------------------|------------------------------------------------|
+| customer.created         | Whenever a customer is created                 |
+| customer.updated         | Whenever a customer is saved, except it's new  |
+| customer.address.created | Whenever a customer address is created                |
+| customer.address.updated | Whenever a customer address is saved, except it's new |
+| sales.order.created      | When a new order is created                    |
+| sales.order.updated      | When the state of an existing order is changed |
+| sales.order.paid         | When an order is fully paid                    |
+| sales.order.shipped      | When an order is fully shipped                 |
+| sales.order.holded       | When an order is set "on hold"                 |
+| sales.order.unholded     | When an order is released from "on hold"       |
+| sales.order.cancelled    | When an order is cancelled                     |
+| sales.shipment.created   | When a new shipment is created                 |
+| sales.invoice.created    | When a new invoice is created                  |
+| sales.invoice.paid       | When an invoice is paid                        |
+| sales.creditmemo.created | When a new creditmemo is created               |
+
+These events work out of the box and can be used within subcribers.
+The module can also be used as a template on how to implement custom events.
+
+### Admin UI
+
+[Mage-OS Asynchronous Events Admin Ui](https://github.com/mage-os/mageos-async-events-admin-ui) provides
+a simple interface to create subscribers for this module in the Magento Admin area instead of via REST API.
+It only supports HTTP subscribers at the moment.
+
+![Admin UI Form](docs/admin_ui_form.png)
+
