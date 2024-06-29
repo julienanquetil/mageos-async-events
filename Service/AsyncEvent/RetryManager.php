@@ -165,7 +165,7 @@ class RetryManager implements RetryManagementInterface
     }
 
     /**
-     * Exponential back off. Change the exponent to determine cubical back off or quartic back off
+     * Quadratic back off: x^2
      *
      * @param int $deathCount
      * @return int
