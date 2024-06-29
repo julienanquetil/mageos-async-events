@@ -39,7 +39,10 @@ Create a new `async_events.xml` under a module's `etc/` directory.
 </config>
 ```
 
-### Create Subscription
+### Create a Subscription
+
+> [!TIP]
+> To view all available event sinks, check out [Async Event Sinks](https://github.com/mage-os/mageos-async-events-sinks) 
 
 #### HTTP Subscription
 ```shell
@@ -57,7 +60,7 @@ curl --location --request POST 'https://test.mageos.dev/rest/V1/async_event' \
 ```
 
 #### Amazon EventBridge Subscription
-Requires the [EventBridge Notifier](https://github.com/aligent/magento2-eventbridge-notifier)
+Requires the [AWS Sinks](https://github.com/mage-os/mageos-async-events-aws)
 
 ```shell
 curl --location --request POST 'https://test.mageos.dev/rest/V1/async_event' \
