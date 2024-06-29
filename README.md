@@ -42,9 +42,10 @@ Create a new `async_events.xml` under a module's `etc/` directory.
 ### Create a Subscription
 
 > [!TIP]
-> To view all available event sinks, check out [Async Event Sinks](https://github.com/mage-os/mageos-async-events-sinks) 
+> To view all available event sinks, check out [Async Event Sinks](https://github.com/mage-os/mageos-async-events-sinks)
 
-#### HTTP Subscription
+#### HTTP
+
 ```shell
 curl --location --request POST 'https://test.mageos.dev/rest/V1/async_event' \
 --header 'Authorization: Bearer TOKEN' \
@@ -53,14 +54,15 @@ curl --location --request POST 'https://test.mageos.dev/rest/V1/async_event' \
     "asyncEvent": {
         "event_name": "sales.order.created",
         "recipient_url": "https://example.com/order_created",
-        "verification_token": "fD03@NpYbXYg",
+        "verification_token": "supersecret",
         "metadata": "http"
     }
 }'
 ```
 
-#### Amazon EventBridge Subscription
-Requires the [AWS Sinks](https://github.com/mage-os/mageos-async-events-aws)
+#### Amazon EventBridge
+
+Requires the [AWS Sinks](https://github.com/mage-os/mageos-async-events-aws) package
 
 ```shell
 curl --location --request POST 'https://test.mageos.dev/rest/V1/async_event' \
@@ -69,30 +71,33 @@ curl --location --request POST 'https://test.mageos.dev/rest/V1/async_event' \
 --data-raw '{
     "asyncEvent": {
         "event_name": "sales.order.created",
-        "recipient_url": "arn:aws:events:ap-southeast-2:005158166381:rule/default",
-        "verification_token": "aIW0G9n3*9wN",
+        "recipient_url": "arn:aws:events:ap-southeast-2:ACCOUNT_ID:rule/BUS_NAME",
+        "verification_token": "supersecret",
         "metadata": "eventbridge"
     }
 }'
 ```
 
 ### Dispatch an asynchronous event
+
 ```php
+use \MageOS\AsyncEvents\Model\AsyncEventPublisher;
+
+// ...
+
+public function __construct(private readonly AsyncEventPublisher $asyncEventPublisher) {}
+
 public function execute(Observer $observer): void
 {
-    /** @var Order $object */
-    $object = $observer->getEvent()->getData('order');
+    /** @var Order $order */
+    $order = $observer->getData('order');
 
     // arguments are the inputs required by the service class in the asynchronous
     // event definition in async_events.xml
     // e.g: Magento\Sales\Api\OrderRepositoryInterface::get
-    $arguments = ['id' => $object->getId()];
-    $data = ['sales.order.created', $this->json->serialize($arguments)];
+    $message = ['id' => $order->getId()];
 
-    $this->publisher->publish(
-        QueueMetadataInterface::EVENT_QUEUE,
-        $data
-    );
+    $this->asyncEventPublisher->publish('sales.order.created', $message);
 }
 ```
 
@@ -116,20 +121,25 @@ is also available to view for investigation purposes.
 
 ## Retries
 
-Events are automatically retried with exponential back off. The default retry limit is 5. The maximum backoff is
+Events are automatically retried with quadratic back off. The default retry limit is 5. The maximum backoff is
 60 seconds.
 
-The exponential backoff is calculated as `min(60, pow($deathCount, 2));`
+> [!IMPORTANT]
+> RabbitMQ is required for retries with back off. If you are using DB queues then quadratic back off is
+> not available, and you will have to implement your own `\MageOS\AsyncEvents\Api\RetryManagementInterface`
 
-| Attempt | Backoff     |
-|---------|-------------|
-| 1       | 1 second    |
-| 2       | 4 seconds   |
-| 3       | 9 seconds   |
-| 4       | 16 seconds  |
-| 5       | 25 seconds  |
+The quadratic backoff is calculated as `min(60, pow($deathCount, 2));`
 
-To change the default retry limit visit Admin > Stores > Settings > Configuration > Advanced > System > Async Events and update `Maximum Deaths`.
+| Attempt | Backoff    |
+|---------|------------|
+| 1       | 1 second   |
+| 2       | 4 seconds  |
+| 3       | 9 seconds  |
+| 4       | 16 seconds |
+| 5       | 25 seconds |
+
+To change the default retry limit visit Admin > Stores > Settings > Configuration > Advanced > System > Async Events and
+update `Maximum Deaths`.
 
 ![Retry Limit Config Page](docs/retry_limit_config.png)
 
@@ -142,9 +152,11 @@ Replays start a new chain of delivery attempts and will respect the same retry m
 
 ## Lucene Query Syntax
 
-All events are indexed in Elasticsearch by default. This allows you to search through events including the event payload!
+All events are indexed in Elasticsearch by default. This allows you to search through events including the event
+payload!
 
-The module supports [Lucene Query Syntax](https://lucene.apache.org/core/2_9_4/queryparsersyntax.html) to query event data like attributes.
+The module supports [Lucene Query Syntax](https://lucene.apache.org/core/2_9_4/queryparsersyntax.html) to query event
+data like attributes.
 
 The following attributes are available across all asynchronous events.
 
@@ -155,7 +167,9 @@ event_name
 success
 created
 ```
+
 The following attributes differ between asynchronous event types.
+
 ```
 data
 ```
@@ -163,6 +177,7 @@ data
 ### Examples
 
 Assuming you have the following events configured
+
 ```
 customer.created
 customer.updated
@@ -173,7 +188,9 @@ shipment.created
 shipment.updated
 shipment.deleted
 ```
+
 You can query all customer events by using a wildcard like `event_name: customer.*` which matches the following events
+
 ```
 customer.created
 customer.updated
@@ -181,6 +198,7 @@ customer.deleted
 ```
 
 You can query all created events like `*.created` which matches the following events
+
 ```
 customer.created
 sales.order.created
@@ -192,9 +210,11 @@ You can further narrow down using the other available attributes such as status 
 
 The following query returns all customer events which have failed. `customer.* AND success: false`
 
-You can combine complex lucene queries to fetch event history and then export them via the admin grid as a csv if you wish.
+You can combine complex lucene queries to fetch event history and then export them via the admin grid as a csv if you
+wish.
 
 #### Searching inside event payloads
+
 Searching an event payload depends on what event you are searching on.
 
 For the following example event payload, four properties are indexed as attributes. Therefore, you can query on
