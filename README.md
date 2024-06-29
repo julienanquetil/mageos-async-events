@@ -1,7 +1,7 @@
 # Magento Asynchronous Events
 
-[![Integration Test](https://github.com/aligent/magento-async-events/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/aligent/magento-async-events/actions/workflows/integration-tests.yml)
-[![REST](https://github.com/aligent/magento-async-events/actions/workflows/api-functional-tests.yml/badge.svg)](https://github.com/aligent/magento-async-events/actions/workflows/api-functional-tests.yml)
+[![Integration Test](https://github.com/mage-os/mageos-async-events/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/mage-os/mageos-async-events/actions/workflows/integration-tests.yml)
+[![REST](https://github.com/mage-os/mageos-async-events/actions/workflows/api-functional-tests.yml/badge.svg)](https://github.com/mage-os/mageos-async-events/actions/workflows/api-functional-tests.yml)
 
 A framework for reliably handling asynchronous events with Magento.
 
@@ -9,28 +9,16 @@ A framework for reliably handling asynchronous events with Magento.
 * **Flexible**: Decoupling events and dispatches provide greater flexibility in message modelling.
 * **Scalable**: Handles back pressure and provides an asynchronous failover model automatically.
 
-## Support
-
-| Async Events | Magento 2.3.x      | >= Magento 2.4.0 <= Magento 2.4.3 | >= Magento 2.4.4   |
-|--------------|--------------------|-----------------------------------|--------------------|
-| 2.x          | :white_check_mark: | :white_check_mark:                | :x:                |
-| 3.x          | :x:                | :x:                               | :white_check_mark: |
-
 ## Installation
 
-```
-composer config repositories.mageos-async-events git https://github.com/mage-os/mageos-async-events.git
-composer require mage-os/mageos-async-events
-```
-
-If you run into an error like "Could not find a version of package mage-os/mageos-async-events matching your minimum-stability (stable).", run this command instead:
-```
-composer require mage-os/mageos-async-events @dev
+```shell
+$ composer require mage-os/mageos-async-events
 ```
 
 Install the module:
-```
-bin/magento setup:upgrade
+
+```shell
+$ bin/magento setup:upgrade
 ```
 
 ## Usage
@@ -55,7 +43,7 @@ Create a new `async_events.xml` under a module's `etc/` directory.
 
 #### HTTP Subscription
 ```shell
-curl --location --request POST 'https://m2.dev.aligent.consulting:44356/rest/V1/async_event' \
+curl --location --request POST 'https://test.mageos.dev/rest/V1/async_event' \
 --header 'Authorization: Bearer TOKEN' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -72,15 +60,15 @@ curl --location --request POST 'https://m2.dev.aligent.consulting:44356/rest/V1/
 Requires the [EventBridge Notifier](https://github.com/aligent/magento2-eventbridge-notifier)
 
 ```shell
-curl --location --request POST 'https://m2.dev.aligent.consulting:44356/rest/V1/async_event' \
+curl --location --request POST 'https://test.mageos.dev/rest/V1/async_event' \
 --header 'Authorization: Bearer TOKEN' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "asyncEvent": {
         "event_name": "sales.order.created",
-        "recipient_url": "arn:aws:events:ap-southeast-2:005158166381:rule/Test.EventBridge.Rule",
+        "recipient_url": "arn:aws:events:ap-southeast-2:005158166381:rule/default",
         "verification_token": "aIW0G9n3*9wN",
-        "metadata": "event_bridge"
+        "metadata": "eventbridge"
     }
 }'
 ```
@@ -111,10 +99,6 @@ Ensure the following consumers are running
 bin/magento queue:consumer:start event.trigger.consumer
 bin/magento queue:consumer:start event.retry.consumer
 ```
-
-## Advanced Usage
-Refer to the [Wiki](https://github.com/aligent/magento-async-events/wiki)
-
 
 # Features
 
@@ -245,3 +229,11 @@ Search all events with the order increment id starting with `CK` and status succ
 
 To turn off asynchronous event indexing visit Admin > Stores > Settings > Configuration > Advanced > System >
 Async Events and disable `Enable Asynchronous Events Indexing`.
+
+## Support
+
+| Async Events | Magento 2.3.x      | >= Magento 2.4.0 <= Magento 2.4.3 | >= Magento 2.4.4   |
+|--------------|--------------------|-----------------------------------|--------------------|
+| 2.x          | :white_check_mark: | :white_check_mark:                | :x:                |
+| 3.x          | :x:                | :x:                               | :white_check_mark: |
+| 4.x          | :x:                | :x:                               | :white_check_mark: |
