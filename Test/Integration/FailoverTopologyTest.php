@@ -78,7 +78,7 @@ class FailoverTopologyTest extends TestCase
         }, $bindings);
 
         /**
-         * Exponential backoff delay queues
+         * Quadratic backoff delay queues
          */
         $this->assertContains('event.retry.init', $destinations);
         $this->assertContains('event.delay.4', $destinations);
