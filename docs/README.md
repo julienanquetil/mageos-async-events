@@ -38,7 +38,7 @@ Whenever Magento writes to the databse, it triggers a `model_save_commit_after`
 event. This module attaches an event listener to that event and publishes
 messages to a rabbitmq queue if that event is configured/whitelisted.
 
-![Webhooks flow](docs/Webhooks.png "Webhooks flow")
+![Webhooks flow](Webhooks.png "Webhooks flow")
 
 A consumer then reads from the queue and loads the subscribers to that event
 and dispatches a 'notification'.
